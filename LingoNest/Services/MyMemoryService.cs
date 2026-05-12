@@ -8,22 +8,28 @@ namespace LingoNest.Services;
 
 public class MyMemoryService : BaseTranslationService
 {
-    private const string BaseUrl = "https://api.mymemory.translated.net/get";
+    private const string BaseUrl = "https://translate.googleapis.com/translate_a/single";
 
     public override async Task<string> TranslateAsync(string text, string fromLang, string toLang)
     {
         if (!ValidateInput(text)) return "Invalid input.";
 
-        string url = $"{BaseUrl}?q={Uri.EscapeDataString(text)}&langpair={fromLang}|{toLang}";
+        string url = $"{BaseUrl}?client=gtx&sl={fromLang}&tl={toLang}&dt=t&q={Uri.EscapeDataString(text)}";
         string response = await Http.GetStringAsync(url);
 
-        JObject json = JObject.Parse(response);
-        return json["responseData"]?["translatedText"]?.ToString() ?? "Translation failed.";
+        JArray json = JArray.Parse(response);
+        string result = "";
+
+        var sentences = json[0] as JArray;
+        if (sentences != null)
+            foreach (var sentence in sentences)
+                result += sentence[0]?.ToString();
+
+        return string.IsNullOrEmpty(result) ? "Translation failed." : result;
     }
 
     public override async Task<string> DetectLanguageAsync(string text)
     {
-        // MyMemory doesn't support detection, return unknown
         return await Task.FromResult("unknown");
     }
 

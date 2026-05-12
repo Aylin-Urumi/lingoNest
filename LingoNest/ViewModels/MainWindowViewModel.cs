@@ -37,7 +37,7 @@ public class MainWindowViewModel : ViewModelBase
         SelectedSourceLanguage = Languages.FirstOrDefault(l => l.Code == "en");
         SelectedTargetLanguage = Languages.FirstOrDefault(l => l.Code == "tr");
     }
-
+    
     public async Task TranslateAsync()
     {
         if (string.IsNullOrWhiteSpace(InputText))
